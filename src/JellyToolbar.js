@@ -1,16 +1,16 @@
 import React from 'react';
-import { StyleSheet, Text, TextInput, View, TouchableWithoutFeedback, Dimensions, Animated, Easing, Keyboard} from 'react-native';
-import Svg, {Circle, Path, Defs, LinearGradient, Stop,} from 'react-native-svg';
-import Icon from 'react-native-vector-icons/Octicons';
-import { WINDOW_W, WINDOW_H, StatusBarHeight, JellyViewHeight, OutJellyViewWidth, SearchIconSize, JellyAnimDuration, PrimaryColor, SecondaryColor } from './constants'
-import {jellyExpandEasing, jellyCollapseEasing, bounceEasing} from './EasingFunction'
+import { StyleSheet, Text, TextInput, View, TouchableWithoutFeedback, Dimensions, Animated, Easing, Keyboard, StatusBar } from 'react-native';
+import Svg, { Circle, Path, Defs, LinearGradient, Stop } from 'react-native-svg';
+import { jellyExpandEasing, jellyCollapseEasing, bounceEasing } from './EasingFunction';
+import PropTypes from 'prop-types';
+
+var WINDOW_W = Dimensions.get('window').width;
+var WINDOW_H = Dimensions.get('window').height;
+const JellyAnimDuration = 1100;
 
 //Wrapping Svg.Path with createAnimatedComponent, for changing Path's d props value.
 //Check https://facebook.github.io/react-native/docs/0.51/animated.html#animatable-components
 let AnimatedPath = Animated.createAnimatedComponent(Path);
-
-//default d value of AnimatedPath
-const defaultJellyPath = `M${OutJellyViewWidth} 0 L${OutJellyViewWidth + WINDOW_W} 0 ${OutJellyViewWidth + WINDOW_W} ${JellyViewHeight} ${OutJellyViewWidth} ${JellyViewHeight} Q ${OutJellyViewWidth} ${JellyViewHeight/2} ${OutJellyViewWidth} 0`;
 
 class JellyToolbar extends React.Component {
   constructor(props) {
@@ -18,7 +18,28 @@ class JellyToolbar extends React.Component {
     this.state = {
       isSearching: false,
       isInputFilled: false,
-    }
+    };
+  }
+
+  static propTypes = {
+    height: PropTypes.number.isRequired,
+    tabWidth: PropTypes.number.isRequired,
+    isStatusBarTranslucent: PropTypes.bool,
+    primaryColor: PropTypes.string.isRequired,
+    secondaryColor: PropTypes.string.isRequired,
+    headerText: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    headerTextSize: PropTypes.number.isRequired,
+    placeholder: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    inputTextSize: PropTypes.number.isRequired,
+    menuIcon: PropTypes.element,
+    openTabIcon: PropTypes.element,
+    closeTabIcon: PropTypes.element,
+  }
+
+  static defaultProps = {
+    isStatusBarTranslucent: false,
+    headerText: 'Header Text',
+    placeholder: 'Search...',
   }
 
   componentWillMount() {
@@ -32,25 +53,23 @@ class JellyToolbar extends React.Component {
     this._cpX.addListener((diff) => {
       this._myPath.setNativeProps(
         {d:
-          `M${OutJellyViewWidth} 0
-          L${OutJellyViewWidth + WINDOW_W} 0 ${OutJellyViewWidth + WINDOW_W} ${JellyViewHeight} ${OutJellyViewWidth} ${JellyViewHeight}
-          Q ${OutJellyViewWidth - (isNaN(diff.value) ? (this.state.isSearching ? (JellyViewHeight - StatusBarHeight)/2 : -(JellyViewHeight - StatusBarHeight)/2) : diff.value)} ${JellyViewHeight/2} ${OutJellyViewWidth} 0`
+          `M${WINDOW_W - this.props.tabWidth} 0
+          L${WINDOW_W - this.props.tabWidth + WINDOW_W} 0 ${WINDOW_W - this.props.tabWidth + WINDOW_W} ${this.props.height} ${WINDOW_W - this.props.tabWidth} ${this.props.height}
+          Q ${WINDOW_W - this.props.tabWidth - (isNaN(diff.value) ? (this.state.isSearching ? this.props.tabWidth/2 : -this.props.tabWidth/2 ) : diff.value)} ${this.props.height/2} ${WINDOW_W - this.props.tabWidth} 0`
         }
       );
     })
   }
 
-  //Before animation started, checking whether user finished searching - if not, don't start animation.
+  //Before animation started, checking whether user finished searching - if not, don't start neither expanding nor collapsing animation.
   shouldComponentUpdate(nextProps, nextState) {
     return (nextState.isSearching != this.state.isSearching);
   }
 
-  //As state is changed by events, determining what animation should be stared - search bar expanding, or collapsing
+  //Because states are changed by events, determining what animation should be stared - search bar expanding, or collapsing
   componentDidUpdate() {
     this.state.isSearching ? this._jellyExpandAnimation() : this._jellyCollapseAnimation()
   }
-
-
 
   //jelly search bar expanding animation
   _jellyExpandAnimation() {
@@ -58,7 +77,7 @@ class JellyToolbar extends React.Component {
     Animated.parallel([
       Animated.timing(this._move,
       {
-        toValue: -OutJellyViewWidth,
+        toValue: -(WINDOW_W - this.props.tabWidth),
         duration: JellyAnimDuration/3 + 250,
         easing: bounceEasing
       }),
@@ -69,7 +88,7 @@ class JellyToolbar extends React.Component {
       }),
       Animated.timing(this._cpX,
       {
-        toValue: (JellyViewHeight - StatusBarHeight)/2,
+        toValue: this.props.tabWidth/2,
         duration: JellyAnimDuration,
         easing: jellyExpandEasing
       }),
@@ -94,7 +113,7 @@ class JellyToolbar extends React.Component {
       }),
       Animated.timing(this._cpX,
       {
-        toValue: (JellyViewHeight - StatusBarHeight)/2,
+        toValue: this.props.tabWidth/2,
         duration: JellyAnimDuration,
         easing: jellyCollapseEasing
       }),
@@ -115,68 +134,64 @@ class JellyToolbar extends React.Component {
     this.setState({isSearching: false});
   }
 
+  renderEmptyTab() {
+    return (
+      <View style={{height: this.props.height - (this.props.isStatusBarTranslucent ? StatusBar.currentHeight : 0), width: this.props.tabWidth}}/>
+    );
+  }
+
   //There are two main components I used for making jellyView - Svg.Path and Animated.View.
   //Svg.Path was used to make jelly-like movement and draw entire jelly search bar. this._cpX is value for this component.
   //Animated.View was used to move components including Path, textInput and other icons. this._move is value for this component.
   render() {
     return (
       <View>
-        <View style={styles.header}>
-          <View style={styles.menuIconWrap}>
-            <Icon
-              name='three-bars'
-              size={SearchIconSize}
-              color='#ffffff'/>
+        <View style={[styles.header, {height: this.props.height, backgroundColor: this.props.primaryColor,   paddingTop: (this.props.isStatusBarTranslucent ? StatusBar.currentHeight : 0),}]}>
+          <View style={[styles.menuIconWrap, {width: this.props.tabWidth,}]}>
+            {this.props.menuIcon ? this.props.menuIcon : this.renderEmptyTab()}
           </View>
-          <Text style={styles.headerText}>News Feed</Text>
+          <Text style={[styles.headerText, {fontSize: this.props.headerTextSize,}]}>{this.props.headerText}</Text>
         </View>
         <Animated.View
           style={[styles.jellyView, {transform: [{translateX: this._move}]}]}>
           <Svg
-            height={JellyViewHeight}
-            width={WINDOW_W + OutJellyViewWidth}>
+            height={this.props.height}
+            width={WINDOW_W + WINDOW_W - this.props.tabWidth}>
             <Defs>
               <LinearGradient id="grad" x1="0" y1="0" x2={WINDOW_W} y2="0">
-                  <Stop offset="0" stopColor= {SecondaryColor} stopOpacity="1" />
-                  <Stop offset="1" stopColor={PrimaryColor} stopOpacity="1" />
+                  <Stop offset="0" stopColor= {this.props.secondaryColor} stopOpacity="1" />
+                  <Stop offset="1" stopColor={this.props.primaryColor} stopOpacity="1" />
               </LinearGradient>
             </Defs>
             <AnimatedPath
               ref = {(ref) => this._myPath = ref}
-              d={defaultJellyPath}
+              d={`M${WINDOW_W - this.props.tabWidth} 0 L${WINDOW_W - this.props.tabWidth + WINDOW_W} 0 ${WINDOW_W - this.props.tabWidth + WINDOW_W} ${this.props.height} ${WINDOW_W - this.props.tabWidth} ${this.props.height} Q ${WINDOW_W - this.props.tabWidth} ${this.props.height/2} ${WINDOW_W - this.props.tabWidth} 0`}
               fill="url(#grad)">
             </AnimatedPath>
           </Svg>
-          <View style={styles.searchBarContainer}>
+          <View style={[styles.searchBarContainer, {height: this.props.height - (this.props.isStatusBarTranslucent ? StatusBar.currentHeight : 0), top: (this.props.isStatusBarTranslucent ? StatusBar.currentHeight : 0), left: WINDOW_W - this.props.tabWidth,}]}>
             <Animated.View
-              style = {[styles.searchIconWrap, {opacity: this._searchFade}]}>
+              style = {[styles.searchIconWrap, {width: this.props.tabWidth, opacity: this._searchFade}]}>
               <TouchableWithoutFeedback
                 onPress = {() => this.setState({isSearching: true,})}
                 disabled = {this.state.isSearching}>
-                <Icon
-                  name="search"
-                  size={SearchIconSize}
-                  color='#ffffff'>
-                </Icon>
+                {this.props.openTabIcon ? this.props.openTabIcon : this.renderEmptyTab()}
               </TouchableWithoutFeedback>
             </Animated.View>
             <TextInput
               ref = {(ref) => this._searchInput = ref}
-              style = {styles.textInput}
+              style = {[styles.textInput, {width: WINDOW_W - (2 * this.props.tabWidth), fontSize: this.props.inputTextSize}]}
               underlineColorAndroid = '#ffffff00'
-              placeholder = {'Search...'}
+              placeholder = {this.props.placeholder}
               placeholderTextColor = '#ffffffaa'
               selectionColor = '#ffffff66'
               autoCorrect = {false}
               onChange = {() => this.setState({isInputFilled: true})}
               />
-            <View style = {styles.closeIconWrap}>
+            <View style = {[styles.closeIconWrap, {width: this.props.tabWidth}]}>
               <TouchableWithoutFeedback
                 onPress = {() => {this.state.isInputFilled ? this.clearInput() : this.closeInput()}}>
-                <Icon
-                  name="x"
-                  size={SearchIconSize +4}
-                  color='#ffffff'/>
+                {this.props.closeTabIcon ? this.props.closeTabIcon : this.renderEmptyTab()}
               </TouchableWithoutFeedback>
             </View>
           </View>
@@ -191,13 +206,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    height: JellyViewHeight,
     width: WINDOW_W,
-    backgroundColor: PrimaryColor,
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    paddingTop: StatusBarHeight,
   },
   jellyView: {
     position: 'absolute',
@@ -205,37 +217,28 @@ const styles = StyleSheet.create({
     left:0,
   },
   menuIconWrap: {
-    width: JellyViewHeight - StatusBarHeight,
     alignSelf: 'center',
     alignItems: 'center',
   },
   headerText: {
-    fontSize: 20,
     fontWeight: 'bold',
     color: '#ffffff',
   },
   searchBarContainer: {
-    height: JellyViewHeight - StatusBarHeight,
     width: WINDOW_W,
     position: 'absolute',
-    top: StatusBarHeight,
-    left: OutJellyViewWidth,
     flexDirection: 'row',
     justifyContent: 'center',
   },
   searchIconWrap: {
-    width: JellyViewHeight - StatusBarHeight,
     alignSelf: 'center',
     alignItems: 'center',
   },
   textInput: {
-    width: WINDOW_W - 2 * (JellyViewHeight - StatusBarHeight),
     alignSelf: 'center',
-    fontSize: 20,
     color: '#ffffff'
   },
   closeIconWrap: {
-    width: JellyViewHeight - StatusBarHeight,
     alignSelf: 'center',
     alignItems: 'center',
   },
