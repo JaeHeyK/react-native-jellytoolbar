@@ -1,6 +1,6 @@
 # react-native-jellytoolbar
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)]()
-[![Version](https://img.shields.io/npm/v/react-native-circular-slider.svg)](https://www.npmjs.com/package/react-native-jellytoolbar)
+[![Version](https://img.shields.io/npm/v/react-native-jellytoolbar.svg)](https://www.npmjs.com/package/react-native-jellytoolbar)
 
 React Native component for creating jelly-like toolbar.  
 Inspired by [Yalantis' JellyToolbar](https://github.com/Yalantis/JellyToolbar) with Kotlin.
@@ -22,26 +22,26 @@ For more information about `react-native-svg`, check [this repository](https://g
 import JellyToolbar from 'react-native-jellytoolbar';
 ```
 2. Use as follows:  
-![react-native-jellytoolbar-result](./asset/ScreenShot.gif)
 ``` jsx
 <JellyToolbar
-     isStatusBarTranslucent = {true}
-     height = {80}
-     tabWidth = {64}
-     primaryColor = '#5B86E5'
-     secondaryColor = '#36D1DC'
-     headerText = {'Menu'}
-     headerTextSize = {20}
-     placeholder = {'Search'}
-     inputTextSize = {20}
-     menuIcon={<Icon.../>}
-     openTabIcon={<Icon.../>}
-     closeTabIcon={<Icon.../>}
+  isStatusBarTranslucent = {true}
+  height = {80}
+  tabWidth = {64}
+  primaryColor = '#5B86E5'
+  secondaryColor = '#36D1DC'
+  headerText = {'Menu'}
+  headerTextSize = {20}
+  placeholder = {'Search'}
+  inputTextSize = {20}
+  menuIcon={<Icon.../>}
+  openTabIcon={<Icon.../>}
+  closeTabIcon={<Icon.../>}
 />
 ```
+![react-native-jellytoolbar-result](./asset/ScreenShot.gif)
 
 ## Properties
-| Prop |Type| <Center>Description | Default | Required |
+| Prop |Type| <Center>Description</Center> | Default | Required |
 |:---:|:---:|---|:---:|:---:|
 |**`isStatusBarTranslucent`**|`boolean`|**Note: For Android**<br> Whether StatusBar is translucent or not|`false`||
 |**`height`**|`number`|Height of toolbar.<br> If you set `isStatusBarTranslucent = {true}`, this value should contain height of StatusBar. |*None*|**O**|
