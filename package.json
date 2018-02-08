@@ -1,6 +1,6 @@
 {
   "name": "react-native-jellytoolbar",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React Native component for creating jelly-like toolbar",
   "main": "./src/JellyToolbar.js",
   "scripts": {
@@ -29,11 +29,11 @@
   },
   "homepage": "https://github.com/JaeHeyK/react-native-jellytoolbar",
   "dependencies": {
-   "react-native-svg": ">=5.1.7",
-   "prop-types": ">=15.5.7"
- },
- "peerDependencies": {
-   "react-native": ">=0.44.0",
-   "react": ">=15.5.0"
- }
+    "react-native-svg": ">=5.1.7",
+    "prop-types": ">=15.5.7"
+  },
+  "peerDependencies": {
+    "react-native": ">=0.44.0",
+    "react": ">=15.5.0"
+  }
 }
