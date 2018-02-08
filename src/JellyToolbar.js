@@ -1,11 +1,10 @@
 import React from 'react';
-import { StyleSheet, Text, TextInput, View, TouchableWithoutFeedback, Dimensions, Animated, Easing, Keyboard, StatusBar } from 'react-native';
-import Svg, { Circle, Path, Defs, LinearGradient, Stop } from 'react-native-svg';
+import { StyleSheet, Text, TextInput, View, TouchableWithoutFeedback, Dimensions, Animated, Keyboard, StatusBar, Platform } from 'react-native';
+import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { jellyExpandEasing, jellyCollapseEasing, bounceEasing } from './EasingFunction';
 import PropTypes from 'prop-types';
 
 var WINDOW_W = Dimensions.get('window').width;
-var WINDOW_H = Dimensions.get('window').height;
 const JellyAnimDuration = 1100;
 
 //Wrapping Svg.Path with createAnimatedComponent, for changing Path's d props value.
@@ -136,7 +135,7 @@ class JellyToolbar extends React.Component {
 
   renderEmptyTab() {
     return (
-      <View style={{height: this.props.height - (this.props.isStatusBarTranslucent ? StatusBar.currentHeight : 0), width: this.props.tabWidth}}/>
+      <View style={{height: this.props.height - (Platform.OS === 'android' ? (this.props.isStatusBarTranslucent ? StatusBar.currentHeight : 0) : (Dimensions.get('window').height == 812 ? 44 : 20)), width: this.props.tabWidth}}/>
     );
   }
 
@@ -146,7 +145,7 @@ class JellyToolbar extends React.Component {
   render() {
     return (
       <View>
-        <View style={[styles.header, {height: this.props.height, backgroundColor: this.props.primaryColor,   paddingTop: (this.props.isStatusBarTranslucent ? StatusBar.currentHeight : 0),}]}>
+        <View style={[styles.header, {height: this.props.height, backgroundColor: this.props.primaryColor,   paddingTop: (Platform.OS === 'android' ? (this.props.isStatusBarTranslucent ? StatusBar.currentHeight : 0) : (Dimensions.get('window').height == 812 ? 44 : 20)),}]}>
           <View style={[styles.menuIconWrap, {width: this.props.tabWidth,}]}>
             {this.props.menuIcon ? this.props.menuIcon : this.renderEmptyTab()}
           </View>
@@ -169,7 +168,7 @@ class JellyToolbar extends React.Component {
               fill="url(#grad)">
             </AnimatedPath>
           </Svg>
-          <View style={[styles.searchBarContainer, {height: this.props.height - (this.props.isStatusBarTranslucent ? StatusBar.currentHeight : 0), top: (this.props.isStatusBarTranslucent ? StatusBar.currentHeight : 0), left: WINDOW_W - this.props.tabWidth,}]}>
+          <View style={[styles.searchBarContainer, {height: this.props.height - (Platform.OS === 'android' ? (this.props.isStatusBarTranslucent ? StatusBar.currentHeight : 0) : (Dimensions.get('window').height == 812 ? 44 : 20)), top: (Platform.OS === 'android' ? (this.props.isStatusBarTranslucent ? StatusBar.currentHeight : 0) : (Dimensions.get('window').height == 812 ? 44 : 20)), left: WINDOW_W - this.props.tabWidth,}]}>
             <Animated.View
               style = {[styles.searchIconWrap, {width: this.props.tabWidth, opacity: this._searchFade}]}>
               <TouchableWithoutFeedback
