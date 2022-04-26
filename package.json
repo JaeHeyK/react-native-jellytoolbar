@@ -29,8 +29,8 @@
   },
   "homepage": "https://github.com/JaeHeyK/react-native-jellytoolbar",
   "dependencies": {
-    "react-native-svg": ">=5.1.7",
-    "prop-types": ">=15.5.7"
+    "react-native-svg": ">=12.3.0",
+    "prop-types": ">=15.8.1"
   },
   "peerDependencies": {
     "react-native": ">=0.44.0",
